@@ -2,10 +2,8 @@ package point
 
 import "math"
 
-type Point struct 
-{
-    x float64
-    y float64
+type Point struct {
+	X, Y float64;
 }
 
 func (p1 Point) Distance(p2 Point) float64 {
