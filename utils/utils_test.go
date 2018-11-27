@@ -2,7 +2,7 @@ package utils_test;
 
 import (
 	"testing"
-	"github.com/gonzalonegre/sandbox1/utils"
+	"github.com/gonzalonegre/sandbox1/comparer"
 )
 
 func TestFloatsEquals(t *testing.T) {

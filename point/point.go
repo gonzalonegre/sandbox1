@@ -1,7 +1,7 @@
 package point
 
 import "math"
-import "github.com/gonzalonegre/sandbox1/utils"
+import "github.com/gonzalonegre/sandbox1/comparer"
 
 type Point struct {
 	X, Y float64;
