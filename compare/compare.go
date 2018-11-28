@@ -1,5 +1,4 @@
-package comparer
-
+package compare
 
 import (
 	"math"
