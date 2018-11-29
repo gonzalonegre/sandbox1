@@ -3,20 +3,20 @@ package clima
 import (
 	"fmt"
 	"strings"
-
+	"strconv"
 	"golang.org/x/net/context"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 )
 
 const (
-	index           = `Dia`
-	invalidUserData = `error: no disponemos de datos`
+	index           = `Dias`
+	invalidData = `error: no disponemos de datos`
 )
 
-// User defines attributes
+// defines attributes
 type Clima struct {
-	Dia  string `json:"dia"`
+	Dia  int `json:"dia"`
 	Estado string `json:"estado"`
 }
 
@@ -24,14 +24,14 @@ type Clima struct {
 // Create an clima
 func Create(c context.Context, clm *Clima) (*Clima, error) {
 	var output *Clima
-	if clm == nil || clm.Dia == `` {
-		return nil, fmt.Errorf(invalidUserData)
+	if clm == nil {
+		return nil, fmt.Errorf(invalidData)
 	}
 
 	output, _ = GetByDia(c, clm.Dia)
 
 	if output == nil {
-		key := datastore.NewKey(c, index, clm.Dia, 0, nil)
+		key := datastore.NewKey(c, index, strconv.Itoa(clm.Dia+1), 0, nil)
 		insKey, err := datastore.Put(c, key, clm)
 
 		if err != nil {
@@ -39,7 +39,8 @@ func Create(c context.Context, clm *Clima) (*Clima, error) {
 			return nil, err
 		}
 
-		output, err = GetByDia(c, insKey.StringID())
+		value,_ :=strconv.Atoi(insKey.StringID())
+		output, err = GetByDia(c, value)
 		if err != nil {
 			log.Errorf(c, "ERROR GETTING DIA OUTPUT: %v", err.Error())
 			return nil, err
@@ -51,24 +52,25 @@ func Create(c context.Context, clm *Clima) (*Clima, error) {
 }
 
 // GetByDia an clima based on its Dia
-func GetByDia(c context.Context, dia string) (*Clima, error) {
-	if dia == `` {
-		return nil, fmt.Errorf(invalidUserData)
-	}
-	userKey := datastore.NewKey(c, index, dia, 0, nil)
+func GetByDia(c context.Context, dia int) (*Clima, error) {
+	
+	storedia:=dia%360
+	if(storedia<0){storedia+=360}
+	key := datastore.NewKey(c, index, strconv.Itoa(storedia+1), 0, nil)
 	var clm Clima
-	err := datastore.Get(c, userKey, &clm)
+	err := datastore.Get(c, key, &clm)
 
 	if err != nil {
 		if strings.HasPrefix(err.Error(), `datastore: no such entity`) {
-			err = fmt.Errorf(invalidUserData, dia)
+			err = fmt.Errorf(invalidData, dia)
 		}
 		return nil, err
 	}
+	clm.Dia = dia
 	return &clm, nil
 }
 
-// GetDias Fetches all users
+// GetDias Fetches all dias
 func GetDias(c context.Context) ([]Clima, error) {
 	var output []Clima
 	q := datastore.NewQuery(index)
@@ -87,13 +89,13 @@ func GetDias(c context.Context) ([]Clima, error) {
 
 // Update clima data
 func Update(c context.Context, clm *Clima) (*Clima, error) {
-	if clm == nil || clm.Dia == `` {
-		return nil, fmt.Errorf(invalidUserData)
+	if clm == nil {
+		return nil, fmt.Errorf(invalidData)
 	}
 
 	output, _ := GetByDia(c, clm.Dia)
 	if output != nil {
-		key := datastore.NewKey(c, index, clm.Dia, 0, nil)
+		key := datastore.NewKey(c, index, strconv.Itoa(clm.Dia+1), 0, nil)
 		insKey, err := datastore.Put(c, key, clm)
 
 		if err != nil {
@@ -101,7 +103,8 @@ func Update(c context.Context, clm *Clima) (*Clima, error) {
 			return nil, err
 		}
 
-		output, err = GetByDia(c, insKey.StringID())
+		value,_ :=strconv.Atoi(insKey.StringID())
+		output, err = GetByDia(c, value)
 		if err != nil {
 			log.Errorf(c, "ERROR GETTING DIA OUTPUT: %v", err.Error())
 			return nil, err
@@ -112,13 +115,13 @@ func Update(c context.Context, clm *Clima) (*Clima, error) {
 }
 
 // Delete an clima based on its Dia.
-func Delete(c context.Context, dia string) error {
+func Delete(c context.Context, dia int) error {
 	var output *Clima
 	output, _ = GetByDia(c, dia)
 
 	if output != nil {
 		log.Infof(c, "Deleting clima, dia: %v", dia)
-		key := datastore.NewKey(c, index, dia, 0, nil)
+		key := datastore.NewKey(c, index, strconv.Itoa(dia+1), 0, nil)
 		err := datastore.Delete(c, key)
 
 		if err != nil {

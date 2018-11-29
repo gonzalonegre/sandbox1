@@ -2,7 +2,7 @@ package controllers
 
 
 import (
-	"fmt"
+	"strconv"
 	"net/http"
 
 	"google.golang.org/appengine"
@@ -29,7 +29,7 @@ func CreateDias(c *gin.Context) {
 	for i:=0 ; i<planet.TOTAL_ANGLE ; i++ {
 		currentWeather, _ := planet.WeatherForDay(&P1, &P2, &P3, i)
 		var clm clima.Clima
-		clm.Dia = fmt.Sprintf("%s",i)
+		clm.Dia = i
 		clm.Estado = currentWeather.String()
 		if _, err = clima.Create(ctx, &clm); err != nil {
 			break;
@@ -50,8 +50,10 @@ func GetDia(c *gin.Context) {
 	var output *clima.Clima
 	reqDia := c.Param("dia")
 	ctx := appengine.NewContext(c.Request)
+        value,_ :=strconv.Atoi(reqDia)
 
-	if output, err = clima.GetByDia(ctx, reqDia); err == nil {
+
+	if output, err = clima.GetByDia(ctx, value); err == nil {
 		c.JSON(http.StatusOK, output)
 	}
 	if err != nil {
@@ -97,8 +99,9 @@ func UpdateDia(c *gin.Context) {
 func DeleteDias(c *gin.Context) {
 	reqDia := c.Param("dia")
 	ctx := appengine.NewContext(c.Request)
+        value,_ :=strconv.Atoi(reqDia)
 
-	err := clima.Delete(ctx, reqDia)
+	err := clima.Delete(ctx, value)
 
 	if err != nil {
 		log.Errorf(ctx, "ERROR: %v", err.Error())
