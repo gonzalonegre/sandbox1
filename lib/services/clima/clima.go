@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	index           = `Dias`
+	index           = `LosDias`
 	invalidData = `error: no disponemos de datos`
 )
 
